@@ -7,8 +7,8 @@ const USERS = usersEnv ? JSON.parse(usersEnv) : {};  // 解析成对象，如果
 const TARGET_URL = "https://zh.wikipedia.org";  // 目标URL改为中文Wikipedia
 
 // 从环境变量读取背景图片和头像图片的URL，设置默认值以防环境变量未定义
-const avatarUrl = Deno.env.get("AVATAR_URL") || "https://en.wikipedia.org/wiki/File:Wikipedia-logo-v2.svg";
-const backgroundUrl = Deno.env.get("Background_URL") || "https://en.wikipedia.org/wiki/File:Wikipedia-logo-v2.svg";
+const avatarUrl = Deno.env.get("AVATAR_URL") || "https://img20.360buyimg.com/openfeedback/jfs/t1/279469/38/22471/35268/680119eaF30689ef9/60cf60dd81ba15b5.png";
+const backgroundUrl = Deno.env.get("Background_URL") || "https://img20.360buyimg.com/openfeedback/jfs/t1/279469/38/22471/35268/680119eaF30689ef9/60cf60dd81ba15b5.png";
 
 async function handler(req: Request): Promise<Response> {
     const url = new URL(req.url);
