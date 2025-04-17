@@ -6,6 +6,10 @@ const USERS = usersEnv ? JSON.parse(usersEnv) : {};  // 解析成对象，如果
 
 const TARGET_URL = "https://zh.wikipedia.org";  // 目标URL改为中文Wikipedia
 
+// 从环境变量读取背景图片和头像图片的URL，设置默认值以防环境变量未定义
+const avatarUrl = Deno.env.get("AVATAR_URL") || "https://en.wikipedia.org/wiki/File:Wikipedia-logo-v2.svg";
+const backgroundUrl = Deno.env.get("Background_URL") || "https://en.wikipedia.org/wiki/File:Wikipedia-logo-v2.svg";
+
 async function handler(req: Request): Promise<Response> {
     const url = new URL(req.url);
     const path = url.pathname;
@@ -22,7 +26,11 @@ async function handler(req: Request): Promise<Response> {
         <style>
             body {
                 font-family: Arial, sans-serif;
-                background-color: #f3f4f6;  /* 轻灰背景，像Hugging Face */
+                background-color: #f3f4f6;  /* 轻灰背景作为默认 */
+                ${backgroundUrl ? `background-image: url('${backgroundUrl}');` : ''}  /* 使用环境变量设置背景图片，如果有的话 */
+                background-size: cover;  /* 让图片覆盖整个背景 */
+                background-position: center;  /* 居中对齐 */
+                background-repeat: no-repeat;  /* 不重复 */
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -30,7 +38,7 @@ async function handler(req: Request): Promise<Response> {
                 margin: 0;
             }
             .login-container {
-                background: white;
+                background: rgba(255, 255, 255, 0.9);  /* 半透明背景，防止背景图片干扰文字 */
                 padding: 2rem;
                 border-radius: 8px;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* 阴影效果 */
@@ -69,25 +77,34 @@ async function handler(req: Request): Promise<Response> {
                 background-color: #2b6cb0;  /* hover效果 */
             }
         </style>
+        <script>
+            // 读取URL参数中的bg，动态覆盖背景图片
+            const urlParams = new URLSearchParams(window.location.search);
+            const bgUrl = urlParams.get('bg');
+            if (bgUrl) {
+                document.body.style.backgroundImage = \`url(\${encodeURI(bgUrl)})\`;
+                document.body.style.backgroundColor = 'transparent';  // 如果有背景图片，覆盖默认颜色
+            }
+        </script>
     </head>
     <body>
         <div class="login-container">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Wikipedia-logo-en-big.png" alt="Wikipedia Logo" class="avatar">
+            <img src="${avatarUrl}" alt="Wikipedia Logo" class="avatar">  <!-- 使用环境变量设置头像图片 -->
             <h1>登录Wikipedia代理</h1>
             <form method="POST" action="/login?goto=${encodeURIComponent(goto)}">
                 <label for="username">用户名：</label><br>
                 <input type="text" id="username" name="username" required><br>
                 <label for="password">密码：</label><br>
                 <input type="password" id="password" name="password" required><br>
-                <button type="submit">Login</button>
-                <p>Power by deno.land & jxufe.icu - Wikipedia Proxy</p>
+                <button type="submit">登录</button>
+                <p>Power by deno.land & jxufe.icu</p>
             </form>
         </div>
     </body>
 </html>
             `, {
                 status: 200,
-                headers: { "Content-Type": "text/html" }
+                headers: { "Content-Type": "text/html; charset=UTF-8" }
             });
         } else if (req.method === "POST") {
             const formData = await req.formData();
